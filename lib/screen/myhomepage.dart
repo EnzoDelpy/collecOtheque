@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:collec_otheque/class/bdd.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'package:collec_otheque/class/api.dart';
@@ -16,34 +17,37 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   API monApi = API();
-  List<int> _lesIsbn = [9781781101056, 9781781101032, 9782070584642];
-  List<Widget> _lesLivres = [];
+  List<dynamic> _lesLivres = [];
+  List<Widget> _lesLivresAffichage = [];
   bool getData = false;
 
   void _incrementCounter() async {
+    BDD.createBdd();
     setState(() {
       _counter++;
     });
   }
 
   void buildBookList() async {
-    _lesLivres = [];
-    if (_lesIsbn.isNotEmpty) {
-      for (int k = 0; k < _lesIsbn.length; k++) {
-        if (k + 1 == _lesIsbn.length && (k % 2) == 0) {
-          _lesLivres.add(
-              Row(children: [buildBook(await monApi.getImage(_lesIsbn[k]))]));
+    BDD.createBdd();
+    _lesLivresAffichage = [];
+    _lesLivres = await BDD.recupLivre(1);
+    if (_lesLivres.isNotEmpty) {
+      for (int k = 0; k < _lesLivres.length; k++) {
+        if (k + 1 == _lesLivres.length && (k % 2) == 0) {
+          _lesLivresAffichage
+              .add(Row(children: [buildBook(_lesLivres[k]['url'])]));
         } else if (k % 2 == 0) {
-          _lesLivres.add(Row(children: [
-            buildBook(await monApi.getImage(_lesIsbn[k])),
-            buildBook(await monApi.getImage(_lesIsbn[k + 1]))
+          _lesLivresAffichage.add(Row(children: [
+            buildBook(_lesLivres[k]['url']),
+            buildBook(_lesLivres[k]['url'])
           ]));
         }
       }
     }
-    log(_lesLivres.toString());
+    log(_lesLivres[0]['url']);
     setState(() {
-      _lesLivres;
+      _lesLivresAffichage;
     });
   }
 
@@ -71,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        child: Column(children: _lesLivres),
+        child: Column(children: _lesLivresAffichage),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,

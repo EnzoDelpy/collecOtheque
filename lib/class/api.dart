@@ -5,11 +5,12 @@ import 'dart:convert' as convert;
 
 class API {
   String key = "AIzaSyBqxK2OtaY7zB-vFUcaeRCefnu83daSbm0";
+  var data;
 
   API();
 
   Future<http.Response> getBookByIsbn(int isbn) {
-    return http.get(
+    data = http.get(
       Uri.parse('https://www.googleapis.com/books/v1/volumes?q=isbn:' +
           isbn.toString() +
           '&key=' +
@@ -19,6 +20,7 @@ class API {
         'Accept': 'application/json',
       },
     );
+    return data;
   }
 
   Future<dynamic> convertJsonToList() async {
@@ -27,7 +29,12 @@ class API {
   }
 
   Future<String> getImage(int isbn) async {
-    var data = convert.jsonDecode((await getBookByIsbn(isbn)).body);
+    var maData = convert.jsonDecode(data.body);
     return data['items'][0]['volumeInfo']['imageLinks']['thumbnail'];
+  }
+
+  Future<String> getTitle() async {
+    var maData = convert.jsonDecode(data.body);
+    return data['items'][0]['volumeInfo']['title'];
   }
 }
