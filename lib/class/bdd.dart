@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:collec_otheque/class/api.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common/sqlite_api.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -10,22 +11,23 @@ import 'package:collec_otheque/test/test.db';
 class BDD {
   BDD();
 
-  static void createBdd() async {
+  static Future<void> createBdd() async {
     // Init ffi loader if needed.
     sqfliteFfiInit();
 
-    var databasesPath = await getDatabasesPath();
+    var databasesPath = await getApplicationDocumentsDirectory();
 
     var databaseFactory = databaseFactoryFfi;
-    var db = await databaseFactory.openDatabase(join(databasesPath, 'demo.db'));
+    var db =
+        await databaseFactory.openDatabase(join(databasesPath.path, 'test'));
     await db.execute('''
-  CREATE TABLE Biblio (
+  CREATE TABLE IF NOT EXISTS Biblio  (
       id INTEGER PRIMARY KEY,
       libelle TEXT
   )
   ''');
     await db.execute('''
-  CREATE TABLE Etagere (
+  CREATE TABLE IF NOT EXISTS Etagere (
       id INTEGER PRIMARY KEY,
       libelle TEXT,
       biblio INTEGER,
@@ -33,7 +35,7 @@ class BDD {
   )
   ''');
     await db.execute('''
-  CREATE TABLE Collection (
+  CREATE TABLE IF NOT EXISTS Collection (
       id INTEGER PRIMARY KEY,
       libelle TEXT,
       etagere INTEGER,
@@ -41,7 +43,7 @@ class BDD {
   )
   ''');
     await db.execute('''
-  CREATE TABLE Livre (
+  CREATE TABLE IF NOT EXISTS Livre (
       id INTEGER PRIMARY KEY,
       titre TEXT,
       url TEXT,
@@ -54,7 +56,7 @@ class BDD {
     await db.insert(
         'Etagere', <String, Object?>{'libelle': 'Mon etagère', 'biblio': 1});
     await db.insert('Collection',
-        <String, Object?>{'libelle': 'Mon etagère', 'etagere': 1});
+        <String, Object?>{'libelle': 'Ma collection', 'etagere': 1});
     await db.insert('Livre', <String, Object?>{
       'titre': 'test',
       'url':
@@ -83,14 +85,42 @@ class BDD {
     });
   }
 
-  static Future<List<dynamic>> recupLivre(int etagere) async {
-    API monApi = API();
-    sqfliteFfiInit();
+  static Future<List<dynamic>> recupLivre(int collection) async {
+    var databasesPath = await getApplicationDocumentsDirectory();
     var databaseFactory = databaseFactoryFfi;
-    var db = await databaseFactory
-        .openDatabase("package:collec_otheque/test/test.db");
+    var db =
+        await databaseFactory.openDatabase(join(databasesPath.path, 'test'));
     var lesLivres =
-        await db.query('Livre', where: 'etagere = ' + etagere.toString());
+        await db.query('Livre', where: 'collection = ' + collection.toString());
+    return lesLivres;
+  }
+
+  static Future<List<dynamic>> recupBiblio() async {
+    var databasesPath = await getApplicationDocumentsDirectory();
+    var databaseFactory = databaseFactoryFfi;
+    var db =
+        await databaseFactory.openDatabase(join(databasesPath.path, 'test'));
+    var lesLivres = await db.query('Biblio');
+    return lesLivres;
+  }
+
+  static Future<List<dynamic>> recupEtagere(int biblio) async {
+    var databasesPath = await getApplicationDocumentsDirectory();
+    var databaseFactory = databaseFactoryFfi;
+    var db =
+        await databaseFactory.openDatabase(join(databasesPath.path, 'test'));
+    var lesLivres =
+        await db.query('Etagere', where: 'biblio = ' + biblio.toString());
+    return lesLivres;
+  }
+
+  static Future<List<dynamic>> recupCollection(int biblio) async {
+    var databasesPath = await getApplicationDocumentsDirectory();
+    var databaseFactory = databaseFactoryFfi;
+    var db =
+        await databaseFactory.openDatabase(join(databasesPath.path, 'test'));
+    var lesLivres =
+        await db.query('Collection', where: 'etagere = ' + biblio.toString());
     return lesLivres;
   }
 }

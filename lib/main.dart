@@ -1,7 +1,10 @@
 import 'dart:developer';
 
 import 'package:collec_otheque/class/api.dart';
-import 'package:collec_otheque/screen/myhomepage.dart';
+import 'package:collec_otheque/screen/biblio.dart';
+import 'package:collec_otheque/screen/collection.dart';
+import 'package:collec_otheque/screen/etagere.dart';
+import 'package:collec_otheque/screen/livre.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -17,7 +20,14 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
-      home: const MyHomePage(title: 'Collec\'Othèque'),
+      home: const Biblio(title: 'Mes biblios'),
+      routes: <String, WidgetBuilder>{
+        '/collection': (BuildContext context) =>
+            const Collection(title: "Mes collections"),
+        '/livre': (BuildContext context) => const Livre(title: "Mes Livres"),
+        '/etagere': (BuildContext context) =>
+            const Etagere(title: "Mes Etageres"),
+      },
     );
   }
 }
